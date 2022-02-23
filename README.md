@@ -4,7 +4,7 @@ I am a complete ameteur programmer.  I have no idea what I am doing.  My wife an
 
 # Instructions to use phosort
 It is an intelij project so open it in inelij or build a jar.  I don't care.
-There ar 2 modes
+There are 2 modes
 # Mode 1: sort
 In sort mode choose a folder that contains all your pictures and vidoes from your phone.  
 It will go through them grab the date and rotation from the metadata and load into the phosort database (locally stored on your computer).  Oh and create thumbnails.  It detects duplicate photos by name and date.  If the name and date are the same it assumes duplicate photo.  Will not load it into the database and moves it to the dupe folder.
