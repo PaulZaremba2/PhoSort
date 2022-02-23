@@ -1,5 +1,4 @@
-# PhoSort
-Photo Sorting by me
+# PhoSort a Photo Sorting Program
 I am a complete ameteur programmer.  I have no idea what I am doing.  My wife and I have millions of photos of our kids and it was getting out of hand.  I decided to try and make our lives easier.  I made a photo sorting program for ourselves to use.  I highly doubt anyone will read this but me.  If you want a photo sorting program that kind of works if you use it just right on a windows pc be my guest.
 
 # Instructions to use phosort
