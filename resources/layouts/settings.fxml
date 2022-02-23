@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.zaremba.phosort.ui.SettingsWindow">
+   <children>
+      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
+         <children>
+            <Label fx:id="sortFolder" text="Label" />
+            <Button mnemonicParsing="false" onAction="#updateSort" text="Update" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
+         <children>
+            <Label fx:id="deleteFolder" text="Label" />
+            <Button mnemonicParsing="false" onAction="#updateDelete" text="Update" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
+         <children>
+            <Label fx:id="videoFolder" text="Label" />
+            <Button mnemonicParsing="false" onAction="#updateVideo" text="Update" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
+         <children>
+            <Label fx:id="duplicateFolder" text="Label" />
+            <Button mnemonicParsing="false" onAction="#updateDupes" text="Update" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
+         <children>
+            <Label fx:id="userPictureFolder" text="Label" />
+            <Button mnemonicParsing="false" onAction="#updatePicutre" text="Update" />
+         </children>
+      </HBox>
+   </children>
+</VBox>

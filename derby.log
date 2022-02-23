@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Wed Feb 23 14:09:27 PST 2022:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-017f-28a1-cf67-00000cb27dc8 
+on database directory C:\Users\pzare\Documents\PhoSort\database\phosort with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@306a30c7 
+Loaded from file:/C:/Users/pzare/.m2/repository/org/apache/derby/derby/10.15.2.0/derby-10.15.2.0.jar
+java.vendor=Amazon.com Inc.
+java.runtime.version=15.0.2+7
+user.dir=C:\Users\pzare\Documents\PhoSort
+os.name=Windows 10
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
