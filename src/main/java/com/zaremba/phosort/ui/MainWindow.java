@@ -819,6 +819,7 @@ public class MainWindow implements Initializable {
 
     public void trashPressed() {
         ArrayList<Photo> deletes = new ArrayList<>();
+        currentIndex = viewingPhotos.indexOf(currentPhoto);
         if (isGrabbing) {
             for (Photo p : selected) {
                 deletes.add(p);
@@ -841,6 +842,8 @@ public class MainWindow implements Initializable {
             deleted.add(deletes);
         if (viewingPhotos.isEmpty()) {
             loadNoImage();
+            selected.clear();
+            return;
         }
         else {
             if (viewingPhotos.get(viewingPhotos.size() - 1).equals(deletes.get(deletes.size() - 1))) {
@@ -853,8 +856,16 @@ public class MainWindow implements Initializable {
                 root.requestFocus();
                 //photos still has deleted photos.  Messes with indexs.  may need visible list
             }
-        }
+            if (currentIndex > viewingPhotos.size() - 1) {
+                currentIndex = viewingPhotos.size() - 1;
+            }
+            currentPhoto = viewingPhotos.get(currentIndex);
+            selected.clear();
+            selected.add(currentPhoto);
+            applySelectedStyle(selected);
+            addImageToImageView(currentPhoto, mainImageView, currentPhoto.getRotation());
 
+        }
     }
 
     public void restorePressed() {
