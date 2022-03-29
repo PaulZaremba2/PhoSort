@@ -93,6 +93,10 @@ public class MainWindow implements Initializable {
     private ArrayList<Photo> likes;
     private ArrayList<Photo> keeps;
     int currentIndex;
+    private double boxHeight;
+    private double boxY;
+    private double tileHeight;
+    private double scrollHeight;
 
 
 
@@ -414,6 +418,7 @@ public class MainWindow implements Initializable {
         ExecutorService executor = Executors.newFixedThreadPool(20);
         executor.submit( () ->{
            addThumbnailsToGrid(folder.getPhotos(), index);
+            folderScrollPane.setVmax(folderTilePane.getHeight() - folderScrollPane.getHeight());
            executor.shutdown();
         });
         root.requestFocus();
@@ -640,6 +645,19 @@ public class MainWindow implements Initializable {
                 });
 
             }
+        }
+        VBox box = currentPhoto.getBox();
+        checkIsVisible(box);
+    }
+
+    private void checkIsVisible(VBox box) {
+        double top =  folderScrollPane.getVvalue();
+        double bottom = folderScrollPane.getVvalue() + folderScrollPane.getHeight();
+        if(box.getLayoutY() < top){
+            folderScrollPane.setVvalue(folderScrollPane.getVvalue() - (top - box.getLayoutY()));
+        }
+        else if(box.getLayoutY() + box.getHeight() > bottom){
+            folderScrollPane.setVvalue(box.getLayoutY() + box.getHeight() - folderScrollPane.getHeight());
         }
     }
 
@@ -1085,7 +1103,6 @@ public class MainWindow implements Initializable {
             return;
         }
         int currentIndex = 0;
-        Folder folder = currentFolder;
         currentIndex = viewingPhotos.indexOf(currentPhoto);
 
         if (keyEvent.getCode() == KeyCode.RIGHT) {
@@ -1110,6 +1127,11 @@ public class MainWindow implements Initializable {
             }
             else{
                 Photo newCurrent = viewingPhotos.get(currentIndex -1);
+                System.out.println(folderTilePane.getHeight());
+                System.out.println(folderScrollPane.getVmax());
+                System.out.println(folderScrollPane.getVvalue());
+                System.out.println(folderScrollPane.getHeight());
+                System.out.println(newCurrent.getBox().getLayoutY());
                 addImageToImageView(newCurrent, mainImageView, newCurrent.getRotation());
                 if(!keyEvent.isShiftDown()) {
                     selected.clear();
@@ -1136,7 +1158,7 @@ public class MainWindow implements Initializable {
             }
 
         } else if (keyEvent.getCode() == KeyCode.DOWN) {
-            if (currentIndex == viewingPhotos.size() - 4) {
+            if (currentIndex > viewingPhotos.size() - 4) {
                 return;
             }
             else{
