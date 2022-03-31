@@ -1,3 +1,25 @@
+/**
+ * @version I dont know how version work and I am too afraid to ask
+ * @author Paul Zaremba
+ *
+ * PhoSort has 2 modes.  Sort and Grab.  Sort mode is used by choosing a folder full of
+ * images and videos.  The program then sorts the videos by date and moves them
+ * into the users video folder.  Then it sorts the pictures by date and stores them in a
+ * temporary sorting directory.  It reads the metadata and creates thumbnails at the same time.
+ * Working folders will then appear on the left scrollpane.  Select a month to sort.
+ * You can choose to like, favourite, keep or delete a photo.  Once you have labeled
+ * all the photos hit the check mark.  It will mark them all appropriately move them
+ * to the sorted photos folder and record them in a database for future grabbing.
+ * Grab mode goes through the sorted photos database and pulls photos out by date and
+ * label. (favourite, like or keep)
+ * You can edit which folders are in the grab project and once you have the photos you want
+ * simply hit the check mark and copy them to any folder of your choosing.
+ * Used for printing, making albums or slide shows etc.
+ *
+ * @Copyright &copy; 2022 Zaremba Programming. All rights reserved.
+ */
+
+
 package com.zaremba.phosort.ui;
 
 
@@ -6,7 +28,6 @@ import com.zaremba.phosort.tools.*;
 import com.zaremba.phosort.tools.Icon;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -30,10 +51,8 @@ import javafx.stage.StageStyle;
 import org.apache.commons.io.FileExistsException;
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.dialog.ProgressDialog;
-
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
@@ -47,59 +66,71 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainWindow implements Initializable {
+    //JavaFX containers
+    //Top Menu Items
+    public VBox root; //Main VBox container everything is in
+    public AnchorPane menuAnchor;//Anchor pane so menu and open close icons work
     public MenuBar menuBar;
-    public ScrollPane folderScrollPane;
-    public TilePane folderTilePane;
-    public ImageView mainImageView;
-    public VBox root;
-    public VBox vboxImageSide;
-    public HBox hBox;
-    public Pane imageBorderPane;
-    public HBox hBoxIcons;
-    public ImageView favouriteIcon;
+    public HBox controlBox;//Holds minimize maximize and close icons
+    //Thumbnail viewing stuff
+    public HBox hBox; //HBox below anchorpane containing thumbnail viewer and photoviewer
+    public VBox asideBox;//Box holding thumbnail view items
+    public AnchorPane imageAnchor;//AnchorPane to make thumbnail viewer stretch (I think)
+    public ScrollPane folderScrollPane;//Scrollpane to show thumbnails
+    public TilePane folderTilePane;//Inside scrollpane to create a tile of thumbnails
+
+    //ImageView and Sorting stuff
+    public VBox vboxImageSide;//VBox containing elements for viewing and sorting images
+    public HBox hBoxIcons;//Contains the status selectors of photos
     public ImageView likeIcon;
     public ImageView trashIcon;
     public ImageView restoreIcon;
     public ImageView finishedIcon;
-    public HBox controlBox;
-    public AnchorPane menuAnchor;
-    public VBox asideBox;
-    public AnchorPane imageAnchor;
+    public ImageView favouriteIcon;
+    //Main ImageView nodes
+    public Pane imageBorderPane;
+    public ImageView mainImageView;
+    //Setting and selecting dates nodes
     public DatePicker fromDate;
     public DatePicker toDate;
     public Button setDateButton;
     public Label dateLabel;
+    //Stage object grabbed in init method
     Stage stage;
+    //Lists
+    private ArrayList<Folder> folders; //Folders to be sorted retreived from Database table folders
+    private ArrayList<Photo> missingThumbnails; //Used when creating thumbnails, if a photo is missing thumbnails add them to this list to be created
+    private ArrayList<Photo> selected; //Holds currently selected photos
+    private ArrayList<ArrayList<Photo>> deleted;//List of list of deleted photos
+    private ArrayList<Photo> viewingPhotos;//Photos currently being viewed
+    private ArrayList<Project> projects; //Projects grabbed from database
+    private ArrayList<Photo> favourites; //Favourites in Grab mode
+    private ArrayList<Photo> likes; //Likes in Grab Mode
+    private ArrayList<Photo> keeps; //Keeps in Grab mode
+    //Info used for layout purposes
     double sceneHeight;
     double sceneWidth;
     public double width;
-    DatabaseHandler handler;
-    private ArrayList<Folder> folders;
-    private Folder currentFolder;
     private double xOffSet = 0;
     private double yOffset = 0;
-    private ArrayList<Photo> missingThumbnails;
-    private ArrayList<Photo> selected;
+
+    DatabaseHandler handler;
+    private Photo currentPhoto;//Current photo in mainImageView
+    private Folder currentFolder;//Current folder being
+    private Project currentProject;
+    //States
     private boolean isPhotoView = false;
-    private Photo currentPhoto;
-    private ArrayList<ArrayList<Photo>> deleted;
-    private ArrayList<Photo> viewingPhotos;
     private boolean isGrabMode = false;
     private boolean isSortingMode = true;
     private boolean isGrabbing = false;
-    private ArrayList<Project> projects;
-    private Project currentProject;
-    private ArrayList<Photo> favourites;
-    private ArrayList<Photo> likes;
-    private ArrayList<Photo> keeps;
     int currentIndex;
-    private double boxHeight;
-    private double boxY;
-    private double tileHeight;
-    private double scrollHeight;
 
-
-
+    /**
+     * This is used to create a progress bar showing how many missing thumbnails in a
+     * folder or a project.  Shows how many are left and the name of the files that
+     * needed thumbnails.
+     * @return returns a task that does stuff
+     */
     public Task
     createMissingThumbs(){
         return new Task(){
@@ -116,7 +147,24 @@ public class MainWindow implements Initializable {
         };
     }
 
-
+    /**
+     * Inside the Platform.runLater portion:
+     * Get the main stage, needed for several layout items
+     * Get measurements of window
+     * Setup the thumbnail and project viewer
+     * Setup the main image viewer
+     * Set items to not be traversable to stop messing with arrows keys
+     * Add Resize listener I dont think this works perfect but good enough so far
+     * load base scene and no image
+     * add listeners to drag menu bar around
+     *
+     * Outside of Platform.runlater:
+     * get database handler
+     * Initialize my lists
+     * disable date pickers
+     * @param location unused
+     * @param resources unused
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater( () -> {
@@ -143,6 +191,7 @@ public class MainWindow implements Initializable {
             finishedIcon.setFocusTraversable(false);
             imageAnchor.setPrefHeight(sceneHeight - 25);
             ResizeHelper.addResizeListener(stage, controlBox);
+            //Too affraid to delete this for some unknown reason.
             stage.widthProperty().addListener((observable, oldValue, newValue) -> {
                 /*vboxImageSide.setPrefWidth(sceneWidth - 450);
                 double width = vboxImageSide.getWidth();
@@ -180,8 +229,11 @@ public class MainWindow implements Initializable {
         setDateButton.setDisable(true);
         dateLabel.setVisible(false);
     }
-    /*
-    Done and working
+
+    /**
+     * This method retreives information from the database where all the key
+     * folders to be used are located.  Ex.  Where to move videos, deleted photos
+     * duplicate photos, sort photos etc.
      */
     private void getSettings() {
         ResultSet rs = handler.execQuery("SELECT * FROM SETTINGS");
@@ -202,6 +254,11 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * The base scene checks if we are sorting or grabbing.  It will give user
+     * ability to add a new sort folder or create a grab project depending on
+     * their mode.
+     */
     private void baseScene() {
         if(isSortingMode) {
             isPhotoView = false;
@@ -224,6 +281,11 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Projects refer to the grab projects of looking through sorted photos
+     * It creates a project, initializes a table in the database. Then it
+     * opens up the project allowing the user to start grabbing photos.
+     */
     private void createProject() {
         String name = "";
         do  {
@@ -246,6 +308,15 @@ public class MainWindow implements Initializable {
         openProject(currentProject);
     }
 
+    /**
+     * This removes the base scene in the scroll pane and sets up the program
+     * to allow the user to select dates and grab photos.  If photos have already
+     * been grabbed it will add their thumbnails to the scrollpane. It also
+     * creates a method that returns the user to the base scene and erases the
+     * lists and other data that was used in the project mode.
+     * @param project Project object that contains information of the
+     *                photos in the project.
+     */
     private void openProject(Project project) {
         toDate.setDisable(false);
         fromDate.setDisable(false);
@@ -287,6 +358,12 @@ public class MainWindow implements Initializable {
         root.requestFocus();
     }
 
+    /**
+     * This method is called in the openProject method.  It goes through the
+     * database and selects all the favourite, liked and kept images.  It stores
+     * them in a list to be retrieved using the date selector and like,favourite and keep
+     * icons.
+     */
     private void getPhotosFromDB() {
         ResultSet rs = handler.execQuery("SELECT * FROM FAVOURITES");
         try {
@@ -326,6 +403,12 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * This is called in the baseScene method if in grab mode.  It looks att he database
+     * for current projects and displays them for the user to select which project
+     * to work on.  Creates a listener on the thumbnails of projects when clicked
+     * executes open project method.
+     */
     private void addProjects() {
         ResultSet rs = handler.execQuery("SELECT * FROM PROJECTS");
         try {
@@ -347,6 +430,12 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Searches through a list of projects and finds the project the user
+     * clicked on.
+     * @param clicked VBox that is holding an image of a project name
+     * @return The project that the user clicked on
+     */
     private Project getProject(VBox clicked) {
         Project returnProject = null;
         root.requestFocus();
@@ -362,6 +451,12 @@ public class MainWindow implements Initializable {
         return returnProject;
     }
 
+    /**
+     * Looks through the database table Folders.  Finds all the current
+     * sorting folders that still need to be sorted.  Adds them to the thumbnail
+     * scroll pane and creates a listener when they are clicked on to open
+     * the selected sort folder
+     */
     private void addFolders() {
         ResultSet rs = handler.execQuery("SELECT * FROM FOLDERS");
         try {
@@ -384,6 +479,20 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * This is used to show the list of images in a sort folder.  If the folder
+     * consists of images that do not have a date it unlocks date picker so
+     * the user can add dates.
+     * It goes through the folder object and adds all the image thumbnails to
+     * the thumbnail viewport.  It creates a listener of what happens when the back
+     * button clicked to return to base scene.
+     * Clears the tilepane and adds photo thumbnails.  This method is also used when
+     * restoring deleted images.It checks for missing thumbnails and if any are missing it
+     * creates them.
+     * @param folder Folder of images to be sorted
+     * @param index Index of current position, 0 if entering folder, integer
+     *              less than size of viewing photos if restoring deleted images.
+     */
     private void openFolder(Folder folder, int index){
         if (folder.getName().equals("NODATE")) {
             toDate.setDisable(false);
@@ -424,6 +533,16 @@ public class MainWindow implements Initializable {
         root.requestFocus();
     }
 
+    /**
+     * Adds all thumbnails from arraylist to the thumbnail viewport.  It
+     * adds listeners to handle when the thumbnail is clicked on.  The
+     * listener adds the photo to selected list and displays it in the
+     * mainImageView.  It allows for multiple images being selected.  If a photo
+     * is marked as deleted it will not add it to the viewing photos list.
+     * It then adds an image to the selected list and displays it.
+     * @param photos List of photos from folder object.
+     * @param index currently selected index position
+     */
     private void addThumbnailsToGrid(ArrayList<Photo> photos, int index) {
         viewingPhotos.clear();
         for (Photo photo : photos) {
@@ -513,6 +632,13 @@ public class MainWindow implements Initializable {
         root.requestFocus();
     }
 
+    /**
+     * I do not remember why I synchronized this and maybe I could remove it.
+     * But if aint broke do not touch it.
+     * It applys the style to display which photos are currently selected, and
+     * there status of favourite, like or delete.
+     * @param selected Current list of selected photos
+     */
     synchronized private void applySelectedStyle(ArrayList<Photo> selected) {
         for (Photo photo : viewingPhotos) {
             photo.getBox().getStyleClass().clear();
@@ -538,6 +664,12 @@ public class MainWindow implements Initializable {
         root.requestFocus();
     }
 
+    /**
+     * Help method to find the photo that is stored inside of a VBox.
+     * Searches the list of viewingPhotos and finds the matching VBox.
+     * @param source VBox selected
+     * @return The Photo object that contains the VBox from source
+     */
     private Photo getPhotoInBox(VBox source) {
         Photo pic = null;
         for (Photo photo : viewingPhotos) {
@@ -549,6 +681,10 @@ public class MainWindow implements Initializable {
         return pic;
     }
 
+    /**
+     * starts the task of creating missing thumbnails.  Opens up the
+     * progress bar and starts making them.
+     */
     private void createMissingThumbnails() {
         root.requestFocus();
         Task missingThumbs = createMissingThumbs();
@@ -556,11 +692,16 @@ public class MainWindow implements Initializable {
         progress.setContentText("Creating missing thumbnails");
         progress.setTitle("PhoSort");
         new Thread(missingThumbs).start();
-
         progress.showAndWait();
-
     }
 
+    /**
+     * Used to create any missing thumbnails that have been lost from intial
+     * creation of the sorting projects.  It stores them in a folder called thumbnails
+     * the thumbnail name is the name of the image plus the date.
+     * @param file Image file to create a thumbnail
+     * @param date Date when the photo was captured from either metadata or database
+     */
     private void createThumbnail(File file, String date) {
         try {
             BufferedImage image = ImageIO.read(file);
@@ -572,7 +713,7 @@ public class MainWindow implements Initializable {
             if (!directory.exists()) {
                 FileUtils.forceMkdir(directory);
             }
-            File out = null;
+            File out;
             if (date == null) {
                 out = new File(path + "\\Pictures\\" + "thumbnails" +"\\" + start + "NODATE" + end);
             }
@@ -589,6 +730,12 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Searches through all the possible folders and finds the folder
+     * containing the VBox.
+     * @param folderBox selected VBox
+     * @return Folder assoiciated with that VBox
+     */
     private Folder getFolder(VBox folderBox){
         Folder returnFolder = null;
         root.requestFocus();
@@ -604,6 +751,13 @@ public class MainWindow implements Initializable {
         return returnFolder;
     }
 
+    /**
+     * Allows the user to select a folder of images to start a sort folder.
+     * It opens a directory chooser and then adds the directory to the
+     * FolderBuilder object which creates the folders projects.
+     * Then we run the addfolders method to add the folders to
+     * the thumbnail viewport.
+     */
     private void addPhotoFolder() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Folder to Sort");
@@ -616,6 +770,9 @@ public class MainWindow implements Initializable {
         addFolders();
     }
 
+    /**
+     * When no image is selected to be loaded we load this image as place holder
+     */
     private void loadNoImage() {
         width = mainImageView.getFitWidth();
         Image image = new Image(getClass().getResourceAsStream(Icon.NOIMAGE.fileName));
@@ -623,6 +780,13 @@ public class MainWindow implements Initializable {
         mainImageView.setRotate(0);
     }
 
+    /**
+     * Takes the currently selected image and adds it the large image view port
+     * This also runs the checkVisible method.
+     * @param photo currently selected photo
+     * @param imageView uneeded only on mainImageview likely could get rid of
+     * @param rotation Applys rotation stored in the database of the photo.
+     */
     private void addImageToImageView(Photo photo, ImageView imageView, String rotation){
         File image = photo.getFile();
         System.out.println(rotation);
@@ -640,9 +804,7 @@ public class MainWindow implements Initializable {
         currentPhoto = photo;
         if (currentFolder != null) {
             if (currentFolder.getName().equals("NODATE")) {
-                Platform.runLater( () ->{
-                    dateLabel.setText(currentPhoto.getDate());
-                });
+                Platform.runLater( () -> dateLabel.setText(currentPhoto.getDate()));
 
             }
         }
@@ -650,6 +812,11 @@ public class MainWindow implements Initializable {
         checkIsVisible(box);
     }
 
+    /**
+     * Checks to see if the currently selected photo is in the scroll pane view port
+     * If it is not in theviewport adjust the viewport so it is visible
+     * @param box VBox containing the currently selected photo
+     */
     private void checkIsVisible(VBox box) {
         double top =  folderScrollPane.getVvalue();
         double bottom = folderScrollPane.getVvalue() + folderScrollPane.getHeight();
@@ -661,6 +828,14 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Applies the rotation of an image to the imageview.  This method is
+     * a little odd as it accounts for some previous version of this program
+     * that stored rotations differently.
+     * @param imageView Imageview the image is in
+     * @param rotation rotation grabbed from Photo object
+     * @param thumbs Whether it is a thumbnail or not
+     */
     private void applyRotation(ImageView imageView, String rotation, boolean thumbs) {
         Rotations rotate = null;
         for (Rotations r : Rotations.values()) {
@@ -683,12 +858,28 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Primarily used to add no photo image to imageview.  Original idea was
+     * to have it be smaller width so it was not so pixelated.  This messed
+     * up the Photos when added to main image view so I commented out.
+     * @param image Likely just the noImage image
+     * @param imageView mainImageView
+     */
     private void addImageToImageView(Image image, ImageView imageView){
         imageView.setImage(image);
         //imageView.setFitWidth(100);
         root.requestFocus();
     }
 
+    /**
+     * This adds an icon into the VBox's that are in the tilepane inside the scroll pane
+     * The VBox's are used as there is an image and a label.  Sets the size and
+     * ensures that they are 4 across.
+     * @param imageTilePane Tilepane inside Scrollpane
+     * @param image The image to add
+     * @param name The name of the file, folder or project
+     * @return Returns the VBox of the icons being added
+     */
     private VBox addIcon(TilePane imageTilePane, Image image, String name){
         ImageView imageView = new ImageView(image);
         imageView.setPreserveRatio(true);
@@ -707,6 +898,13 @@ public class MainWindow implements Initializable {
         return vbox;
     }
 
+    /**
+     * If in grab mode.  Searches through the favourites arraylist pulled from
+     * the database.  Checks if it meets the dates requirements and adds it to
+     * the current working project.
+     * If in sort mode. It adds all the selected photos to be marked as favourited
+     * If they are already marked favourited it changes them back to keep
+     */
     public void favouritePressed() {
         if (isGrabbing) {
             ArrayList<Photo> grabbed = new ArrayList<>();
@@ -752,6 +950,13 @@ public class MainWindow implements Initializable {
         root.requestFocus();
     }
 
+    /**
+     * If in grab mode.  Searches through the Likes arraylist pulled from
+     * the database.  Checks if it meets the dates requirements and adds it to
+     * the current working project.
+     * If in sort mode. It adds all the selected photos to be marked as liked
+     * If they are already marked liked it changes them back to keep
+     */
     public void likePressed() {
         if (isGrabbing) {
             ArrayList<Photo> grabbed = new ArrayList<>();
@@ -794,7 +999,12 @@ public class MainWindow implements Initializable {
         }
         root.requestFocus();
     }
-
+    /**
+     * If in grab mode.  Searches through the Keeps arraylist pulled from
+     * the database.  Checks if it meets the dates requirements and adds it to
+     * the current working project.
+     * If in sort mode. It adds all the selected photos to be marked as Keep
+     */
     public void keepPressed() {
         if (isGrabbing) {
             ArrayList<Photo> grabbed = new ArrayList<>();
@@ -835,6 +1045,14 @@ public class MainWindow implements Initializable {
         root.requestFocus();
     }
 
+    /**
+     * if in grab mode removes the photo from the current project. Resets the thumbnails.
+     * if in sort mode sets the status to deleted and removes it from the
+     * viewing photos list.
+     * In both modes it tracks the deleted items in a temporary list that
+     * will disapear if leaving the project or folder.
+     * This allows users to undue deleted items.
+     */
     public void trashPressed() {
         ArrayList<Photo> deletes = new ArrayList<>();
         currentIndex = viewingPhotos.indexOf(currentPhoto);
@@ -861,7 +1079,6 @@ public class MainWindow implements Initializable {
         if (viewingPhotos.isEmpty()) {
             loadNoImage();
             selected.clear();
-            return;
         }
         else {
             if (viewingPhotos.get(viewingPhotos.size() - 1).equals(deletes.get(deletes.size() - 1))) {
@@ -886,6 +1103,12 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * If photos have been deleted it will restore them.  This only works if the
+     * photos have been deleted in the current session.
+     * If the user leaves the sort folder or project the lists of deleted
+     * folders are wiped
+     */
     public void restorePressed() {
         if (deleted.isEmpty()) {
             return;
@@ -913,6 +1136,13 @@ public class MainWindow implements Initializable {
         //applySelectedStyle(selected);
     }
 
+    /**
+     * Takes the date as a string likely from the database and returns
+     * a date object
+     * @param stringDate String holding the date in the form yyyy-MM-dd
+     * @return A date object from the given string
+     * @throws ParseException Should not occur as users never enter strings
+     */
     private Date stringDateToDate(String stringDate) throws ParseException {
         try {
             String pattern = "yyyy-MM-dd";
@@ -923,6 +1153,17 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * In grab mode it allows the user to choose a directory to save all the
+     * selected images to.  Does not delete the project.  Allows users
+     * to continue to open up and copy images.
+     *
+     * In sort mode it checks the status of every image in the sort folder.
+     * It then copies them into sorted directories gotten from the settings.
+     * The folders will be SettingsFolder/Year/Month
+     * It then adds the photo to 1 of 4 databases: Favourite, Like, Keep, Deletes
+     * It deletes the sort folder so it will no longer be visible in the basescene
+     */
     public void finished() {
         if (isGrabbing) {
             DirectoryChooser chooser = new DirectoryChooser();
@@ -967,47 +1208,52 @@ public class MainWindow implements Initializable {
                     String year = getYearString(photo.getDate());
                     String month = getMonthString(photo.getDate());
                     String destination = starter + "\\" + year + "\\" + month + "\\" + photo.getName();
-                    if (photo.getStatus().equals("DELETED")) {
-                        String insert = "INSERT INTO DELETED (NAME, DATE) VALUES ('" + photo.getName() + "', '" + sqlDate + "')";
-                        handler.execAction(insert);
-                        try {
-                            FileUtils.moveFile(photo.getFile(), new File(deleteFolder.getAbsolutePath() + "\\" + photo.getName()));
-                        } catch (IOException e) {
-                            Alert alert1 = new Alert(Alert.AlertType.WARNING);
-                            alert1.setHeaderText("Failed to move file to deletes");
-                            alert1.setContentText(photo.getName() + ": was set to be deleted but failed to move");
-                        }
+                    switch (photo.getStatus()) {
+                        case "DELETED" -> {
+                            String insert = "INSERT INTO DELETED (NAME, DATE) VALUES ('" + photo.getName() + "', '" + sqlDate + "')";
+                            handler.execAction(insert);
+                            try {
+                                FileUtils.moveFile(photo.getFile(), new File(deleteFolder.getAbsolutePath() + "\\" + photo.getName()));
+                            } catch (IOException e) {
+                                Alert alert1 = new Alert(Alert.AlertType.WARNING);
+                                alert1.setHeaderText("Failed to move file to deletes");
+                                alert1.setContentText(photo.getName() + ": was set to be deleted but failed to move");
+                            }
 
-                    } else if (photo.getStatus().equals("KEEP")) {
-                        String insert = "INSERT INTO KEEP (NAME, DATE, LOCATION, ROTATION) VALUES ('" + photo.getName() + "','" + sqlDate + "','" + destination + "','" + photo.getRotation() + "')";
-                        handler.execAction(insert);
-                        try {
-                            FileUtils.moveFile(photo.getFile(), new File(destination));
-                        } catch (IOException e) {
-                            e.printStackTrace();
                         }
+                        case "KEEP" -> {
+                            String insert = "INSERT INTO KEEP (NAME, DATE, LOCATION, ROTATION) VALUES ('" + photo.getName() + "','" + sqlDate + "','" + destination + "','" + photo.getRotation() + "')";
+                            handler.execAction(insert);
+                            try {
+                                FileUtils.moveFile(photo.getFile(), new File(destination));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
 
-                    } else if (photo.getStatus().equals("FAVOURITE")) {
-                        String insert = "INSERT INTO FAVOURITES (NAME, DATE, LOCATION, ROTATION) VALUES ('" + photo.getName() + "','" + sqlDate + "' ,'" + destination + "','" + photo.getRotation() + "')";
-                        handler.execAction(insert);
-                        try {
-                            FileUtils.moveFile(photo.getFile(), new File(destination));
-                        } catch (FileExistsException existsException) {
-                            Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
-                            alert1.setContentText(photo.getName() + " Already Exists should not occur in final version");
-                        } catch (IOException e) {
-                            e.printStackTrace();
                         }
+                        case "FAVOURITE" -> {
+                            String insert = "INSERT INTO FAVOURITES (NAME, DATE, LOCATION, ROTATION) VALUES ('" + photo.getName() + "','" + sqlDate + "' ,'" + destination + "','" + photo.getRotation() + "')";
+                            handler.execAction(insert);
+                            try {
+                                FileUtils.moveFile(photo.getFile(), new File(destination));
+                            } catch (FileExistsException existsException) {
+                                Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+                                alert1.setContentText(photo.getName() + " Already Exists should not occur in final version");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
 
-                    } else if (photo.getStatus().equals("LIKE")) {
-                        String insert = "INSERT INTO LIKES (NAME, DATE, LOCATION, ROTATION) VALUES ('" + photo.getName() + "','" + sqlDate + "','" + destination + "','" + photo.getRotation() + "')";
-                        handler.execAction(insert);
-                        try {
-                            FileUtils.moveFile(photo.getFile(), new File(destination));
-                        } catch (IOException e) {
-                            e.printStackTrace();
                         }
+                        case "LIKE" -> {
+                            String insert = "INSERT INTO LIKES (NAME, DATE, LOCATION, ROTATION) VALUES ('" + photo.getName() + "','" + sqlDate + "','" + destination + "','" + photo.getRotation() + "')";
+                            handler.execAction(insert);
+                            try {
+                                FileUtils.moveFile(photo.getFile(), new File(destination));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
 
+                        }
                     }
 
                 }
@@ -1029,59 +1275,54 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Used to keep sort folders in order.  WHen viewing folders in FileExplorer
+     * they are alphabetical.  I prefered to be by date of the month.  This adds
+     * a number to the beggining of the month folder so they will be arranged
+     * chronoligically in File Explorer.
+     * @param date Date the photo was taken
+     * @return Month in the form #-month. Ex. 1-January
+     */
     private String getMonthString(String date) {
         String value = "";
         String num = date.substring(5, 7);
         int number = Integer.parseInt(num);
         switch (number) {
-            case 1:
-                value = number + "-January";
-                break;
-            case 2:
-                value = number + "-February";
-                break;
-            case 3:
-                value = number + "-March";
-                break;
-            case 4:
-                value = number + "-April";
-                break;
-            case 5:
-                value = number + "-May";
-                break;
-            case 6:
-                value = number + "-June";
-                break;
-            case 7:
-                value = number + "-July";
-                break;
-            case 8:
-                value = number + "-August";
-                break;
-            case 9:
-                value = number + "-September";
-                break;
-            case 10:
-                value = number + "-October";
-                break;
-            case 11:
-                value = number + "-November";
-                break;
-            case 12:
-                value = number + "-December";
-                break;
+            case 1 -> value = number + "-January";
+            case 2 -> value = number + "-February";
+            case 3 -> value = number + "-March";
+            case 4 -> value = number + "-April";
+            case 5 -> value = number + "-May";
+            case 6 -> value = number + "-June";
+            case 7 -> value = number + "-July";
+            case 8 -> value = number + "-August";
+            case 9 -> value = number + "-September";
+            case 10 -> value = number + "-October";
+            case 11 -> value = number + "-November";
+            case 12 -> value = number + "-December";
         }
         return value;
     }
 
+    /**
+     * Used to get the year for making sort folders
+     * @param date date of photo being sorted
+     * @return The year in the form of a 4 letter string
+     */
     private String getYearString(String date) {
         return date.substring(0, 4);
     }
 
+    /**
+     * Minimize to tray.
+     */
     public void minimize() {
         stage.setIconified(true);
     }
 
+    /**
+     * Maximize to screen.
+     */
     public void maximize() {
         Screen screen = Screen.getPrimary();
         Rectangle2D bounds = screen.getVisualBounds();
@@ -1092,17 +1333,28 @@ public class MainWindow implements Initializable {
         stage.setHeight(bounds.getHeight());
     }
 
+    /**
+     * Closes window and exits program.
+     */
     public void close() {
         System.exit(0);
     }
 
+    /**
+     * Detects key inputs for various tasks including:
+     * navigating thumbnails with arrow keys
+     * Multiple selection with shift and ctrl (similiar to Windows multiple
+     * selection).
+     * Can favourite, keep, like, delete.  F, K, L ,D respectively
+     * @param keyEvent Which key was pressed
+     */
     public void chooseSelected(KeyEvent keyEvent) {
         root.requestFocus();
         if (!isPhotoView && !isGrabbing) {
             System.out.println("NOT VIEWING");
             return;
         }
-        int currentIndex = 0;
+        int currentIndex;
         currentIndex = viewingPhotos.indexOf(currentPhoto);
 
         if (keyEvent.getCode() == KeyCode.RIGHT) {
@@ -1184,16 +1436,17 @@ public class MainWindow implements Initializable {
         }
     }
 
-    public void savePhotoGrab(ActionEvent actionEvent) {
-    }
-
-    public void openPhotoGrab(ActionEvent actionEvent) {
-    }
-
+    /**
+     * Open settings window to change the settings
+     */
     public void openSettingsChanger() {
         loadWindow("/layouts/settings.fxml");
     }
 
+    /**
+     * Used to open new windows, currently only settings window is used
+     * @param location url of FXML file
+     */
     private void loadWindow(String location){
         try{
             Parent parent = FXMLLoader.load(getClass().getResource(location));
@@ -1205,6 +1458,13 @@ public class MainWindow implements Initializable {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Compares date of a photo to date of the date picker.
+     * @param imageDate Date of image
+     * @param toDate Date on date picker
+     * @return true if the imageDate is earlier than the toDate
+     */
     private boolean dateLessThan(Date imageDate, LocalDate toDate){
         if(toDate == null){
             return true;
@@ -1233,19 +1493,28 @@ public class MainWindow implements Initializable {
             }
             else if(imageMonth == toMonth){
                 //System.out.println("image month the same");
-                if(imageDay > toDay){
-                    //System.out.println("image day greater");
-                    return false; //Same year same month greather than day
-                }
+                //System.out.println("image day greater");
+                return imageDay <= toDay; //Same year same month greather than day
             }
         }
         return true;
     }
 
+    /**
+     * Have to convert the year of the datepicker object for some annoying reason.
+     * @param year Weird integer from datepicker year
+     * @return The proper year to it should be
+     */
     private int convertYear(int year){
-        int actualYear = 1900 + year;
-        return actualYear;
+        return 1900 + year;
     }
+
+    /**
+     * Compares the date of an image to the date of the datepicker
+     * @param imageDate Date of image
+     * @param fromDate Date of fromDate picker
+     * @return true if the imageDate is later than the fromDate
+     */
     private boolean dateGreaterThan(Date imageDate, LocalDate fromDate){
         if(fromDate == null){
             return true;
@@ -1269,16 +1538,21 @@ public class MainWindow implements Initializable {
                 return false; //Same year greather than month
             }
             else if(imageMonth == toMonth){
-                if(imageDay < toDay){
-                    return false; //Same year same month greather than day
-                }
+                return imageDay >= toDay; //Same year same month greather than day
             }
         }
         return true;
     }
 
-    public void keep(MouseEvent mouseEvent) {
+    /**
+     * surprised this is not needed my be issue.  TODO Check this
+     */
+    public void keep() {
     }
+
+    /**
+     * Selected from menu to enter grab mode.
+     */
     public void grabMode() {
         if(!isPhotoView) {
             isGrabMode = true;
@@ -1287,6 +1561,9 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Selected fro menu to enter sortMode
+     */
     public void sortMode() {
         if(!isGrabbing) {
             isSortingMode = true;
@@ -1295,6 +1572,11 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Sets the date of an image that has no metadata of date.
+     * IT allows the user to keep a date in the database so the image can
+     * be pulled later.
+     */
     public void setDate() {
         if (toDate.getValue() == null) {
             return;
@@ -1308,6 +1590,10 @@ public class MainWindow implements Initializable {
 
     }
 
+    /**
+     * It searches through the entire database and makes a list of any files
+     * that are not in the location according to the database.
+     */
     public void checkDatabaseFiles() {
         ArrayList<String> missingPhotos = new ArrayList<>();
         ResultSet resultSet = handler.execQuery("SELECT * FROM FAVOURITES");
@@ -1386,6 +1672,10 @@ public class MainWindow implements Initializable {
 
     }
 
+    /**
+     * If a project is no longer needed it can be deleted.  Photos are not
+     * deleted just the database table.
+     */
     public void deleteProject() {
         if (isGrabbing) {
             handler.execAction("DROP TABLE " + currentProject.getProjectName());
@@ -1405,9 +1695,22 @@ public class MainWindow implements Initializable {
         }
     }
 
+    /**
+     * Allows user to have a starting point of a project.
+     */
     public void copyProject() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText("Not functioning yet.");
         alert.showAndWait();
+    }
+
+    /**
+     * TODO
+     * Ability to migrate entire database and images.  This may be needed
+     * if the current location of the database is getting full.  Or wants to
+     * stored externally.
+     */
+    public void migrateDatabase() {
+
     }
 }

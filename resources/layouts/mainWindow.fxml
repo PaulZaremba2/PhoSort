@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#chooseSelected" prefHeight="809.0" prefWidth="1031.0" styleClass="vbox" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.zaremba.phosort.ui.MainWindow">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#chooseSelected" prefHeight="809.0" prefWidth="1031.0" styleClass="vbox" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.zaremba.phosort.ui.MainWindow">
    <children>
       <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="1031.0" style="-fx-background-color: #424242;">
          <children>
@@ -27,15 +27,15 @@
                     <menus>
                       <Menu mnemonicParsing="false" text="File">
                         <items>
-                          <MenuItem mnemonicParsing="false" onAction="#savePhotoGrab" text="Save" />
-                              <MenuItem mnemonicParsing="false" onAction="#openPhotoGrab" text="Open..." />
+                          <MenuItem mnemonicParsing="false" text="Save" />
+                              <MenuItem mnemonicParsing="false" text="Open..." />
                               <MenuItem mnemonicParsing="false" onAction="#openSettingsChanger" text="Settings" />
                         </items>
                       </Menu>
                       <Menu mnemonicParsing="false" text="Database">
                         <items>
                           <MenuItem mnemonicParsing="false" onAction="#checkDatabaseFiles" text="Check for Missing Files" />
-                              <MenuItem mnemonicParsing="false" text="Migrate Database" />
+                              <MenuItem mnemonicParsing="false" onAction="#migrateDatabase" text="Migrate Database" />
                         </items>
                       </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
