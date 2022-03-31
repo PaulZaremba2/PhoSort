@@ -1,3 +1,9 @@
+/**
+ * Contains information about a folder to be sorted.
+ * It has the location, list of photos,
+ * VBox for its thumbnail to be selected,
+ */
+
 package com.zaremba.phosort.tools;
 
 import javafx.scene.layout.VBox;
@@ -9,10 +15,10 @@ import java.util.ArrayList;
 
 public class Folder {
     private String name;
-    private File location;
-    private ArrayList<Photo> photos;
-    private VBox box;
-    private DatabaseHandler handler;
+    private final File location;
+    private final ArrayList<Photo> photos;
+    private final VBox box;
+    private final DatabaseHandler handler;
 
     public Folder(String name, File location, VBox box){
         this.name = name;
@@ -31,35 +37,9 @@ public class Folder {
         this.name = name;
     }
 
-    public File getLocation() {
-        return location;
-    }
-
-    public void setLocation(File location) {
-        this.location = location;
-    }
-
     public ArrayList<Photo> getPhotos() {
         return photos;
     }
-
-    public void setPhotos(ArrayList<Photo> photos) {
-        this.photos = photos;
-    }
-
-    public void setBox(VBox box) {
-        this.box = box;
-    }
-
-    public DatabaseHandler getHandler() {
-        return handler;
-    }
-
-    public void setHandler(DatabaseHandler handler) {
-        this.handler = handler;
-    }
-
-
 
     private void populatePhotos(){
         String qu = "SELECT * FROM " + name;
@@ -89,9 +69,7 @@ public class Folder {
     public boolean equals(Object obj) {
         if(obj instanceof Folder){
             Folder other = (Folder)obj;
-            if (other.location.equals(this.location)) {
-                return true;
-            }
+            return other.location.equals(this.location);
         }
         return false;
     }

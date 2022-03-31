@@ -1,3 +1,10 @@
+/**
+ * This is a helper class that creates a folder.  It sorts through the images
+ * in a directory.  Extracts the meta data.  Adds them to the database.
+ * Checks if they are duplicate photos and moves them to a duplicated folder
+ *
+ */
+
 package com.zaremba.phosort.tools;
 
 
