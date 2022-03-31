@@ -1711,6 +1711,9 @@ public class MainWindow implements Initializable {
      * stored externally.
      */
     public void migrateDatabase() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        File newSortFolder = chooser.showDialog(stage);
+        File sortFolder = Settings.sortFolder;
 
     }
 }

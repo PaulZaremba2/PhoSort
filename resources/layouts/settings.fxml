@@ -11,30 +11,35 @@
          <children>
             <Label fx:id="sortFolder" text="Label" />
             <Button mnemonicParsing="false" onAction="#updateSort" text="Update" />
+            <Label text="Sorted Photos" />
          </children>
       </HBox>
       <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
          <children>
             <Label fx:id="deleteFolder" text="Label" />
             <Button mnemonicParsing="false" onAction="#updateDelete" text="Update" />
+            <Label text="Deleted Photos" />
          </children>
       </HBox>
       <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
          <children>
             <Label fx:id="videoFolder" text="Label" />
             <Button mnemonicParsing="false" onAction="#updateVideo" text="Update" />
+            <Label text="Videos" />
          </children>
       </HBox>
       <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
          <children>
             <Label fx:id="duplicateFolder" text="Label" />
             <Button mnemonicParsing="false" onAction="#updateDupes" text="Update" />
+            <Label text="Duplicates" />
          </children>
       </HBox>
       <HBox alignment="CENTER" prefHeight="50.0" prefWidth="600.0" spacing="30.0">
          <children>
             <Label fx:id="userPictureFolder" text="Label" />
             <Button mnemonicParsing="false" onAction="#updatePicutre" text="Update" />
+            <Label text="User Pictures" />
          </children>
       </HBox>
    </children>
