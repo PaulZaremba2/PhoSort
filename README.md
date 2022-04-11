@@ -1,9 +1,16 @@
 # PhoSort a Photo Sorting Program
-I am a complete ameteur programmer.  I have no idea what I am doing.  My wife and I have millions of photos of our kids and it was getting out of hand.  I decided to try and make our lives easier.  I made a photo sorting program for ourselves to use.  I highly doubt anyone will read this but me.  If you want a photo sorting program that kind of works if you use it just right on a windows pc be my guest.
+My wife and I faced a common problem, we took too many photos of our family.  I always found it annoying with digital cameras you snap 20 pictures but only really want to keep the best 1 or 2.  I made a program that was specifically designed for us to handle the large volume of photos.  We would take up to several hundred pictures each month but really only need to keep a select few.  After about a few months we would upload them to our computer and put rough dates on them.  It may it hard to find the pictures we wanted not to mention 20 pictures of the same thing with only 1 or 2 we want.  So I made a program to help us deal with the images.  
+The inspiration was fast sorting so that it was the program is designed to do.  A general walkthrough looks like this:
+
+On first launch it creates a locally stored database.  The user can take a folder of images that was uploaded to the computer and choose it to starting a working sort folder.  The program takes all the images and moves them into a sorting directory organized by date (year, month).  It then displays the working folder on the base scene of the program.  The user can click on the folder they wish to sort to start sorting.
+
+We found the fastest way to choose the best images was to have the thumbnails displayed on one side while a large version of a selected image is displayed on the other.  The user can then select single photos or multiple photos and rank them as follows: Favourite, Like, Keep, Delete.  (Automatically all are set to keep).  Once the entire folder has been sorted click the check mark and it moves the images to the sorted folder.  
+
+To find images the user can go into grab mode where they create a new grab project.  They can select two dates and then a rank (Except deleted).  All the photos between those dates and of that rank will be displayed in the same way as when they were sorted.  The user can then delete photos from the list until they have the desired photos.  Then the checkmark button allows the photos to be copied to any directory for the user.  We personally use this for makign slide shows or printing.  Example, we make a yearly slide show for our kids birthday so I just select the dates from their last birthday to their current.  Pull up all the favourites first.  If I need more I add the likes.  Then I weed down to how many photos I need for the slide show.  The program save the grabs as a project as at times we needed to pull the same set of photos again.  
 
 # Instructions to use phosort
-It is an intelij project so open it in inelij or build a jar.  I don't care.
-There are 2 modes
+It is an intelij project so open it in inelij and run it or create a jar file.  
+
 # Mode 1: sort
 In sort mode choose a folder that contains all your pictures and vidoes from your phone.  
 It will go through them grab the date and rotation from the metadata and load into the phosort database (locally stored on your computer).  Oh and create thumbnails.  It detects duplicate photos by name and date.  If the name and date are the same it assumes duplicate photo.  Will not load it into the database and moves it to the dupe folder.
@@ -23,11 +30,15 @@ Give it a name and it makes a new table in the database
 The calander choosers are now usable.  Select a from date and a to date.  Next click either like, favourite or keep.  It will pull all photos from the database that fall within those dates and were liked favrouited or kept.  The check mark now lets you make a copy of those photos to any directory you choose.  The originals are never copied and won't be touched to avoid degredation.  THere are a few other small features but you can figure them out.
 
 # Warnings
-There are still some issues with the program.  I have not done extensive testing.  It, for the most part, works for my phone, my wifes phone, and our digital camera.  We are both saumsung galaxy users.  I have no idea if that matters.
-So far no photos were harmed in the making of this program.
+There are still some issues with the program.  I have not done extensive testing.  It, for the most part, works for my phone, my wifes phone, and our digital camera.  We are both saumsung galaxy users.  It has also only been used on and is intended for Windows.  When we have gotten images from other sources like from visiting santa clause and we pay for the image there have been some display issues.  No photos have been harmed in the making of this program.
 
-I am sure the way I programmed this was completley wrong and it could be 1000x better.  
+I am a self taught programmer.  I know there are likely much better ways to make this program.  My code could be compartementalized better, and my GUI could use work.  So far this program has worked for us to help sort photos.  It is a work in progress where I continue to add things to make our life easier.  
 
-Thanks to all the stack overflow and libraries I used to make this happen.  It was alot.
+# TODO:
+Add feature to migrate the entire database.  Our computer is running out of room and the database stores the file locations so I just cant move them off the computer.
 
-I do not believe in comments or testing.  Good luck with that.
+Add Tags to photos.  Likely make them custom built and everytime the user makes a tag have some sort of quick way of assigning them to the photos.  My goal was to ween through photos quickly and I am afraid this may defeat that purpose.
+
+Add ability to zoom in on the displayed photo.  Sometimes nice to see facves up close to determine which pictures are best
+
+Create same sorting criteria for the videos.  Currently they just get sorted by date in the users video folder.  Ability to rank and pull them would also be useful.
