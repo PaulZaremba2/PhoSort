@@ -30,7 +30,7 @@ Give it a name and it makes a new table in the database
 The calander choosers are now usable.  Select a from date and a to date.  Next click either like, favourite or keep.  It will pull all photos from the database that fall within those dates and were liked favrouited or kept.  The check mark now lets you make a copy of those photos to any directory you choose.  The originals are never copied and won't be touched to avoid degredation.  THere are a few other small features but you can figure them out.
 
 # Warnings
-There are still some issues with the program.  I have not done extensive testing.  It, for the most part, works for my phone, my wifes phone, and our digital camera.  We are both saumsung galaxy users.  When we have gotten images from other sources like from visiting santa clause and we pay for the image there have been some display issues.  No photos have been harmed in the making of this program.
+There are still some issues with the program.  I have not done extensive testing.  It, for the most part, works for my phone, my wifes phone, and our digital camera.  We are both saumsung galaxy users.  It has also only been used on and is intended for Windows.  When we have gotten images from other sources like from visiting santa clause and we pay for the image there have been some display issues.  No photos have been harmed in the making of this program.
 
 I am a self taught programmer.  I know there are likely much better ways to make this program.  My code could be compartementalized better, and my GUI could use work.  So far this program has worked for us to help sort photos.  It is a work in progress where I continue to add things to make our life easier.  
 
@@ -40,3 +40,5 @@ Add feature to migrate the entire database.  Our computer is running out of room
 Add Tags to photos.  Likely make them custom built and everytime the user makes a tag have some sort of quick way of assigning them to the photos.  My goal was to ween through photos quickly and I am afraid this may defeat that purpose.
 
 Add ability to zoom in on the displayed photo.  Sometimes nice to see facves up close to determine which pictures are best
+
+Create same sorting criteria for the videos.  Currently they just get sorted by date in the users video folder.  Ability to rank and pull them would also be useful.
