@@ -34,7 +34,7 @@ There are still some issues with the program.  I have not done extensive testing
 
 I am a self taught programmer.  I know there are likely much better ways to make this program.  My code could be compartementalized better, and my GUI could use work.  So far this program has worked for us to help sort photos.  It is a work in progress where I continue to add things to make our life easier.  
 
-#TODO:
+# TODO:
 Add feature to migrate the entire database.  Our computer is running out of room and the database stores the file locations so I just cant move them off the computer.
 
 Add Tags to photos.  Likely make them custom built and everytime the user makes a tag have some sort of quick way of assigning them to the photos.  My goal was to ween through photos quickly and I am afraid this may defeat that purpose.
