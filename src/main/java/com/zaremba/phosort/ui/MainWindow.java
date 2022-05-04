@@ -1713,7 +1713,10 @@ public class MainWindow implements Initializable {
     public void migrateDatabase() {
         DirectoryChooser chooser = new DirectoryChooser();
         File newSortFolder = chooser.showDialog(stage);
-        File sortFolder = Settings.sortFolder;
-
+        new MigrateTable(handler, "KEEP", newSortFolder.getAbsolutePath());
+        new MigrateTable(handler, "LIKES", newSortFolder.getAbsolutePath());
+        new MigrateTable(handler, "FAVOURITES", newSortFolder.getAbsolutePath());
+        handler.execUpdate("UPDATE SETTINGS SET VALUE = '" + newSortFolder.getAbsolutePath() + "' WHERE VARIABLE = 'sortFolder'");
+        Settings.sortFolder = newSortFolder;
     }
 }
