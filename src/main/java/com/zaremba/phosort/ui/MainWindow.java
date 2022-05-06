@@ -268,7 +268,10 @@ public class MainWindow implements Initializable {
             Image addFolder = new Image(getClass().getResourceAsStream(Icon.ADDFOLDERICON.fileName));
             VBox addFolderBox = addIcon(folderTilePane, addFolder, "New SortFolder");
             addFolderBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> addPhotoFolder());
+            toDate.setValue(null);
+            fromDate.setValue(null);
             addFolders();
+
         } else if (isGrabMode) {
             isPhotoView = false;
             folderTilePane.getChildren().clear();
@@ -277,6 +280,8 @@ public class MainWindow implements Initializable {
             Image addFolder = new Image(getClass().getResourceAsStream(Icon.ADDFOLDERICON.fileName));
             VBox addFolderBox = addIcon(folderTilePane, addFolder, "New Project");
             addFolderBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> createProject());
+            toDate.setValue(null);
+            fromDate.setValue(null);
             addProjects();
         }
     }
@@ -288,24 +293,37 @@ public class MainWindow implements Initializable {
      */
     private void createProject() {
         String name = "";
+        boolean invalidName = false;
         do  {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Grabber");
             dialog.setHeaderText("Name of Grab Project");
             dialog.setContentText("Name:");
             Optional<String> result = dialog.showAndWait();
+            invalidName = false;
             if (result.isPresent()) {
                 name = result.get();
             }
             if (name.length() < 1) {
-                name = "Default" + (int) (Math.random() * 1000);
+                name = "cancel$$$$!!!!";
             }
-        }while(handler.checkTableExists(name));
-        String qu = "INSERT INTO PROJECTS (NAME, LOCATION) VALUES ('"+name+"','NONE' )";
-        handler.execAction(qu);
-        handler.createImageFolderTable(name);
-        currentProject = new Project(name);
-        openProject(currentProject);
+            if (name.indexOf(" ") >= 0) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("No spaces please");
+                alert.showAndWait();
+                invalidName = true;
+            }
+        }while(handler.checkTableExists(name) || invalidName);
+        if(name.equals("cancel$$$$!!!!")){
+            return;
+        }
+        else{
+            String qu = "INSERT INTO PROJECTS (NAME, LOCATION) VALUES ('"+name+"','NONE' )";
+            handler.execAction(qu);
+            handler.createImageFolderTable(name);
+            currentProject = new Project(name);
+            openProject(currentProject);
+        }
     }
 
     /**

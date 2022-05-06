@@ -59,6 +59,7 @@ public class MigrateTable {
                         File old = new File(oldPath);
                         File newFil = new File(newpath);
                         FileUtils.moveFile(old,newFil);
+                        handler.execUpdate("UPDATE "+ tableName + " SET LOCATION = '" + newFil.getAbsolutePath() + "' WHERE FILENAME = '" + newFil.getName() + "'");
                         updateProgress(pos, size);
                         pos++;
                     }
