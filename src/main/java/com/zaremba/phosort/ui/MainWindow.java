@@ -34,6 +34,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.CacheHint;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -354,10 +355,11 @@ public class MainWindow implements Initializable {
             favourites.clear();
             keeps.clear();
             loadNoImage();
-            baseScene();
             toDate.setDisable(true);
             fromDate.setDisable(true);
             selected.clear();
+            baseScene();
+
         });
         missingThumbnails = new ArrayList<>();
         for (Photo photo : project.getPhotos()) {
@@ -591,8 +593,8 @@ public class MainWindow implements Initializable {
                 VBox vbox = new VBox();
                 vbox.setAlignment(Pos.BOTTOM_CENTER);
                 vbox.getStyleClass().add("vboxImages");
-                vbox.setPadding(new Insets(7,7,7,7));
-                vbox.setPrefWidth(70);
+                vbox.setPadding(new Insets(7,7,0,7));
+                //vbox.setPrefWidth(90);
                 javafx.scene.control.Label test = new javafx.scene.control.Label(photo.getName());
                 test.setTextFill(Color.web("#FAFAFA"));
                 vbox.getChildren().addAll(imageView,test);
@@ -859,10 +861,8 @@ public class MainWindow implements Initializable {
         for (Rotations r : Rotations.values()) {
             if (r.fileName.equals(rotation)) {
                 rotate = r;
-                System.out.println(rotate);
             }
         }
-        System.out.println(rotation);
         if (rotate != null) {
             imageView.setRotate(rotate.rotation);
             if(rotate.equals(Rotations.OLD270)){
@@ -871,7 +871,20 @@ public class MainWindow implements Initializable {
                 imageView.setRotate(270);
             }
             if ((rotate.rotation == 90 || rotate.rotation == 270)  && !thumbs) {
+                System.out.println(imageBorderPane.getHeight() - 30);
                 mainImageView.setFitWidth(imageBorderPane.getHeight() - 30);
+            }
+            else if(!thumbs){
+                mainImageView.setFitWidth(imageBorderPane.getWidth() - 30);
+            }
+            if (thumbs) {
+                VBox box = (VBox)imageView.getParent();
+                List children= box.getChildren();
+                Label label = (Label)children.get(1);
+                box.setSpacing(20);
+                System.out.println(box.getWidth());
+                box.setPrefWidth(90);
+                System.out.println("After being set to 90: " + box.getWidth());
             }
         }
     }
@@ -1428,7 +1441,7 @@ public class MainWindow implements Initializable {
             }
 
         } else if (keyEvent.getCode() == KeyCode.DOWN) {
-            if (currentIndex > viewingPhotos.size() - 4) {
+            if (currentIndex > viewingPhotos.size() - 5) {
                 return;
             }
             else{
