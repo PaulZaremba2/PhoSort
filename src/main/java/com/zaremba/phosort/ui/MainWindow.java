@@ -40,15 +40,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.stage.*;
 import org.apache.commons.io.FileExistsException;
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.dialog.ProgressDialog;
@@ -91,6 +91,8 @@ public class MainWindow implements Initializable {
     //Main ImageView nodes
     public Pane imageBorderPane;
     public ImageView mainImageView;
+    public ImageView zoomer;
+    public Image zoomImage;
     //Setting and selecting dates nodes
     public DatePicker fromDate;
     public DatePicker toDate;
@@ -98,6 +100,7 @@ public class MainWindow implements Initializable {
     public Label dateLabel;
     //Stage object grabbed in init method
     Stage stage;
+    public Popup zoomPopup;
     //Lists
     private ArrayList<Folder> folders; //Folders to be sorted retreived from Database table folders
     private ArrayList<Photo> missingThumbnails; //Used when creating thumbnails, if a photo is missing thumbnails add them to this list to be created
@@ -114,6 +117,8 @@ public class MainWindow implements Initializable {
     public double width;
     private double xOffSet = 0;
     private double yOffset = 0;
+    private double zoomX = 0;
+    private double zoomY = 0;
 
     DatabaseHandler handler;
     private Photo currentPhoto;//Current photo in mainImageView
@@ -125,6 +130,7 @@ public class MainWindow implements Initializable {
     private boolean isSortingMode = true;
     private boolean isGrabbing = false;
     int currentIndex;
+    private boolean hovering = false;
 
     /**
      * This is used to create a progress bar showing how many missing thumbnails in a
@@ -1749,5 +1755,45 @@ public class MainWindow implements Initializable {
         new MigrateTable(handler, "FAVOURITES", newSortFolder.getAbsolutePath());
         handler.execUpdate("UPDATE SETTINGS SET VALUE = '" + newSortFolder.getAbsolutePath() + "' WHERE VARIABLE = 'sortFolder'");
         Settings.sortFolder = newSortFolder;
+    }
+
+    public void mouseEntered(MouseEvent mouseEvent) {
+        hovering = true;
+        zoomX = mainImageView.getX();
+        zoomY = mainImageView.getY();
+        System.out.println("startx: " + zoomX);
+        System.out.println("starty:" + zoomY);
+    }
+
+    public void mouseExited(MouseEvent mouseEvent) {
+        hovering = false;
+        mainImageView.setScaleX(1);
+        mainImageView.setScaleY(1);
+        mainImageView.setX(zoomX);
+        mainImageView.setY(zoomY);
+        mainImageView.setTranslateY(0);
+        mainImageView.setTranslateX(0);
+        System.out.println("endx: " + (zoomX - mainImageView.getTranslateX()));
+        System.out.println("endy: " + (zoomY - mainImageView.getTranslateY()));
+
+
+    }
+
+    public void mouseMoved(MouseEvent mouseEvent) {
+
+    }
+
+    public void zoomIn(ScrollEvent scrollEvent) {
+        if (hovering) {
+            ZoomOperator zoomOperator = new ZoomOperator();
+            double zoomFactor = 1.5;
+            System.out.println("Translate X:"+mainImageView.getTranslateX());
+            System.out.println("Trnslate Y" + mainImageView.getTranslateY());
+        if (scrollEvent.getDeltaY() <= 0) {
+            // zoom out
+            zoomFactor = 1 / zoomFactor;
+        }
+            zoomOperator.zoom(mainImageView, zoomFactor, scrollEvent.getSceneX(), scrollEvent.getSceneY());
+        }
     }
 }

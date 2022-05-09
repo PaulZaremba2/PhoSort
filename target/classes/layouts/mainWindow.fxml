@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#chooseSelected" prefHeight="809.0" prefWidth="1031.0" styleClass="vbox" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.zaremba.phosort.ui.MainWindow">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#chooseSelected" onScroll="#zoomIn" prefHeight="809.0" prefWidth="1031.0" styleClass="vbox" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.zaremba.phosort.ui.MainWindow">
    <children>
       <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="1031.0" style="-fx-background-color: #424242;">
          <children>
@@ -188,7 +188,7 @@
                   <VBox fx:id="imageBorderPane" alignment="CENTER" prefHeight="705.0" prefWidth="891.0" styleClass="imageBorderPane" stylesheets="@../style.css">
                      <children>
 
-                              <ImageView fx:id="mainImageView" cache="true" cacheHint="SPEED" fitHeight="686.0" fitWidth="876.0" pickOnBounds="true" preserveRatio="true" />
+                              <ImageView fx:id="mainImageView" cache="true" cacheHint="SPEED" fitHeight="686.0" fitWidth="876.0" onMouseEntered="#mouseEntered" onMouseExited="#mouseExited" onMouseMoved="#mouseMoved" pickOnBounds="true" preserveRatio="true" />
                      </children>
                   </VBox>
                   <HBox alignment="CENTER" prefHeight="135.0" prefWidth="891.0" spacing="20.0">
