@@ -10,10 +10,14 @@ package com.zaremba.phosort.tools;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Descriptor;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.mov.QuickTimeDirectory;
+import com.drew.metadata.mov.metadata.QuickTimeMetadataDirectory;
 import com.drew.metadata.mp4.Mp4Directory;
 import com.zaremba.imgscalr.Scalr;
 import javafx.concurrent.Task;
@@ -112,9 +116,11 @@ public class FolderBuilder {
         String year;
         String month;
         Metadata metadata;
-        if(isMP4(file)){
+        if(isMp4(file)){
             try{
                 metadata = ImageMetadataReader.readMetadata(file);
+                System.out.println(metadata.toString());
+
                 dir = metadata.getFirstDirectoryOfType(Mp4Directory.class);
                 date = dir.getDate(Mp4Directory.TAG_CREATION_TIME);
                 formattedDate = format.format(date);
@@ -136,6 +142,50 @@ public class FolderBuilder {
             }
         }
         else {
+                try {
+                    System.out.println("stupid movs");
+                    Metadata metadata1 = ImageMetadataReader.readMetadata(file);
+                    QuickTimeMetadataDirectory directory = metadata1.getFirstDirectoryOfType(QuickTimeMetadataDirectory.class);
+                    date = directory.getDate(1286);
+                    System.out.println(date);
+                    formattedDate = format.format(date);
+                    System.out.println(formattedDate);
+                    split = formattedDate.split(" ");
+                    year = split[0];
+                    month = split[1];
+                    String destination = deststart + "\\" + year + "\\" + month + "\\" + file.getName();
+                    destinationFile = new File(destination);
+                    int num = 1;
+                    while (destinationFile.exists()) {
+                        String extension = destination.substring(destination.lastIndexOf("."));
+                        destination = destination.substring(0, destination.lastIndexOf(".")) + " - copy (" + num + ")" + extension;
+                        destinationFile = new File(destination);
+                        num++;
+                    }
+                    FileUtils.moveFile(file,destinationFile);
+                    /*QuickTimeDirectory directory = metadata1.getFirstDirectoryOfType(QuickTimeDirectory.class);
+                    date = directory.getDate(QuickTimeMetadataDirectory.TAG_CREATION_DATE);
+                    System.out.println(date);
+                    formattedDate = format.format(date);
+                    split = formattedDate.split(" ");
+                    year = split[0];
+                    month = split[1];
+                    String destination = deststart + "\\" + year + "\\" + month + "\\" + file.getName();
+                    destinationFile = new File(destination);
+                    int num = 1;
+                    while (destinationFile.exists()) {
+                        String extension = destination.substring(destination.lastIndexOf("."));
+                        destination = destination.substring(0, destination.lastIndexOf(".")) + " - copy (" + num + ")" + extension;
+                        destinationFile = new File(destination);
+                        num++;
+                    }
+                    FileUtils.moveFile(file,destinationFile);*/
+                } catch (ImageProcessingException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            /*System.out.println("in the else");
             String destination = deststart + "\\" + file.getName();
             destinationFile = new File(destination);
             int num = 1;
@@ -149,12 +199,12 @@ public class FolderBuilder {
                 FileUtils.moveFile(file, destinationFile);
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 
     //Done should be fine
-    private boolean isMP4(File f) {
+    private boolean isMp4(File f) {
         String name = f.getName();
         int index = name.lastIndexOf(".");
         String type = name.substring(index+1);
@@ -412,7 +462,7 @@ public class FolderBuilder {
                     extension = name.substring(i + 1);
                     if(extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png") || extension.equals("JPG")){
                         images.add(f);
-                    }else if(extension.equals("avi") || extension.equals("mp4") || extension.equals("mov")){
+                    }else if(extension.equals("avi") || extension.equals("mp4") || extension.equals("MOV")){
                         videos.add(f);
                     }else{
                         others.add(f);
