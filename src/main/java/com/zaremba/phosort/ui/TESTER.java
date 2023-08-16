@@ -9,6 +9,7 @@ import com.drew.metadata.exif.ExifIFD0Descriptor;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDescriptor;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.mp4.Mp4Directory;
 import com.twelvemonkeys.contrib.exif.EXIFUtilities;
 import com.twelvemonkeys.contrib.exif.Orientation;
 import com.zaremba.phosort.tools.DatabaseHandler;
@@ -21,6 +22,8 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.logging.Logger;
 
 public class TESTER {
     public static ArrayList<String> rotations = new ArrayList<>();
@@ -41,60 +44,18 @@ public class TESTER {
     }
 
     public static void main(String[] args) {
-        /*File[] files;
-        File file = new File("C:\\Users\\pzare\\Pictures\\SortingDir\\2018 May");
-        files = file.listFiles();
-        for (File f : files) {
-            String rot = getRotation(f);
-            String databaseRot = rot.substring(rot.indexOf("("));
-            System.out.println(databaseRot);
-        }*/
-        DatabaseHandler handler = DatabaseHandler.getHandler();
-        ResultSet rs = handler.execQuery("SELECT * FROM KEEP");
-        String month = "";
-        String year = "";
-        String newPath = "c:\\path\\to\\myfile\\";
-        String file1 = "C:\\Users\\pzaremba\\Desktop\\testing\\Sorted\\2020\\6-June\\Screenshot_20220329-122642_Chrome.jpg";
-        String date1 = "2020-06-10";
-        String file2 = "C:\\Users\\pzaremba\\Desktop\\testing\\Sorted\\2022\\3-March\\20220326_145645.jpg";
-        String date2 = "2022-03-26";
-        int count = 0;
+        File image = new File("IMG_2924.JPG");
         try{
-            while (count < 2) {
-                if (count == 0) {
-                    String date = date1;
-                    String oldPath = file1;
-                    String[] splitter = date.split("-");
-                    month = splitter[1];
-                    year = splitter[0];
-                    int index = oldPath.indexOf(year + "\\" + getMonth(month));
-                    System.out.println(newPath + oldPath.substring(index));
-
-                } else if (count == 1) {
-                    String date = date2;
-                    String oldPath = file2;
-                    String[] splitter = date.split("-");
-                    month = splitter[1];
-                    year = splitter[0];
-                    int index = oldPath.indexOf(year + "\\" + getMonth(month));
-                    System.out.println(newPath + oldPath.substring(index));
-                }
-                count++;
-
-            }
-        } catch (Exception e) {
+            Metadata metadata = ImageMetadataReader.readMetadata(image);
+            ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+            Date date = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_DIGITIZED);
+            System.out.println(date);
+        }catch (ImageProcessingException e) {
             e.printStackTrace();
+            System.out.println("Getting Date of file:" + image.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Getting Date of file:" + image.getName());
         }
-
-
-    }
-
-    private static String getMonth(String month) {
-        if (month.equals("06")) {
-            return "6-June";
-        } else if (month.equals("03")) {
-            return "3-March";
-        }
-        return "error";
     }
 }

@@ -145,6 +145,7 @@ public class FolderBuilder {
                 try {
                     System.out.println("stupid movs");
                     Metadata metadata1 = ImageMetadataReader.readMetadata(file);
+                    System.out.println(metadata1);
                     QuickTimeMetadataDirectory directory = metadata1.getFirstDirectoryOfType(QuickTimeMetadataDirectory.class);
                     date = directory.getDate(1286);
                     System.out.println(date);
@@ -208,7 +209,7 @@ public class FolderBuilder {
         String name = f.getName();
         int index = name.lastIndexOf(".");
         String type = name.substring(index+1);
-        return type.equals("mp4");
+        return type.equals("mp4") || type.equals("MP4");
     }
     //Done tested on old program
     private boolean checkDuplicatePhoto(File image) {
@@ -460,9 +461,9 @@ public class FolderBuilder {
                 int i = name.lastIndexOf(".");
                 if(i >= 0){
                     extension = name.substring(i + 1);
-                    if(extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png") || extension.equals("JPG")){
+                    if(extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png") || extension.equals("JPG") || extension.equals("JPEG")){
                         images.add(f);
-                    }else if(extension.equals("avi") || extension.equals("mp4") || extension.equals("MOV")){
+                    }else if(extension.equals("avi") || extension.equals("mp4") || extension.equals("MOV") || extension.equals("MP4")){
                         videos.add(f);
                     }else{
                         others.add(f);
@@ -478,7 +479,7 @@ public class FolderBuilder {
         if( i >= 0) {
             extension = fileName.substring(i+1);
             extension.toLowerCase();
-            if(extension.equals("JPG")||extension.equals("jpg")||extension.equals("png")||extension.equals("jpeg")){
+            if(extension.equals("JPG")||extension.equals("jpg")||extension.equals("png")||extension.equals("jpeg")||extension.equals("JEPG")){
                 return true;
             }
         }
