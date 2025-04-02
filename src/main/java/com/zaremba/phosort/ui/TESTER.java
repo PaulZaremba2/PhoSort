@@ -44,18 +44,6 @@ public class TESTER {
     }
 
     public static void main(String[] args) {
-        File image = new File("IMG_2924.JPG");
-        try{
-            Metadata metadata = ImageMetadataReader.readMetadata(image);
-            ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-            Date date = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_DIGITIZED);
-            System.out.println(date);
-        }catch (ImageProcessingException e) {
-            e.printStackTrace();
-            System.out.println("Getting Date of file:" + image.getName());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Getting Date of file:" + image.getName());
-        }
+
     }
 }

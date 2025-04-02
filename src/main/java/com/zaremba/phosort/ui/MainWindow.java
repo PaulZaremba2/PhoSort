@@ -1242,8 +1242,12 @@ public class MainWindow implements Initializable {
                     }
                     java.sql.Date sqlDate = new java.sql.Date(date.getTime());
                     String starter = sortFolder.getAbsolutePath();
-                    String year = getYearString(photo.getDate());
-                    String month = getMonthString(photo.getDate());
+                    String year = "2000";
+                    String month = "00-NODATE";
+                    if(!photo.getDate().equals("NODATE")){
+                        year = getYearString(photo.getDate());
+                        month = getMonthString(photo.getDate());
+                    }
                     String destination = starter + "\\" + year + "\\" + month + "\\" + photo.getName();
                     switch (photo.getStatus()) {
                         case "DELETED" -> {

@@ -142,7 +142,9 @@ public class FolderBuilder {
             }
         }
         else {
+            //return;
                 try {
+
                     System.out.println("stupid movs");
                     Metadata metadata1 = ImageMetadataReader.readMetadata(file);
                     System.out.println(metadata1);
@@ -186,6 +188,7 @@ public class FolderBuilder {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+
             /*System.out.println("in the else");
             String destination = deststart + "\\" + file.getName();
             destinationFile = new File(destination);
@@ -211,31 +214,36 @@ public class FolderBuilder {
         String type = name.substring(index+1);
         return type.equals("mp4") || type.equals("MP4");
     }
+
+    private boolean checkIfSameImage(File newImage, File existingImage) {
+        return newImage.length() == existingImage.length();
+    }
     //Done tested on old program
     private boolean checkDuplicatePhoto(File image) {
-        Date date = null;
+       /* Date date = null;
         try {
             date = getDate(image);
         } catch (Exception e) {
             date = new Date();
-        }
+        }*/
         ResultSet rs = handler.execQuery("SELECT * FROM FAVOURITES");
         try{
             while (rs.next()) {
                 File photo = new File(rs.getString("LOCATION"));
                 if (photo.getName().equals(image.getName())) {
-                    Date phoDate = getDate(photo);
+                   /* Date phoDate = getDate(photo);
                     if (date.equals(phoDate)) {
                         System.out.println("File: " + image.getName() + " already exists in favourites");
                         return true;
-                    }
+                    }*/
+                    return checkIfSameImage(photo, image);
                 }
             }
             rs.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        rs = handler.execQuery("SELECT * FROM DELETED");
+        /*rs = handler.execQuery("SELECT * FROM DELETED");
         try{
             while (rs.next()) {
                 String name = rs.getString("NAME");
@@ -251,17 +259,18 @@ public class FolderBuilder {
             rs.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        }
+        }*/
         rs = handler.execQuery("SELECT * FROM KEEP");
         try{
             while (rs.next()) {
                 File photo = new File(rs.getString("LOCATION"));
                 if (photo.getName().equals(image.getName())) {
-                    Date phoDate = getDate(photo);
+                    /*Date phoDate = getDate(photo);
                     if (date.equals(phoDate)) {
                         System.out.println("File: " + image.getName() + " already exists in Keeps");
                         return true;
-                    }
+                    }*/
+                    return checkIfSameImage(photo, image);
                 }
             }
             rs.close();
@@ -273,11 +282,12 @@ public class FolderBuilder {
             while (rs.next()) {
                 File photo = new File(rs.getString("LOCATION"));
                 if (photo.getName().equals(image.getName())) {
-                    Date phoDate = getDate(photo);
+                    /*Date phoDate = getDate(photo);
                     if (date.equals(phoDate)) {
                         System.out.println("File: " + image.getName() + " already exists in LIKES");
                         return true;
-                    }
+                    }*/
+                    return checkIfSameImage(photo, image);
                 }
             }
             rs.close();
@@ -301,11 +311,12 @@ public class FolderBuilder {
                 while (rs.next()) {
                     File photo = new File(rs.getString("FILELOCATION"));
                     if (photo.getName().equals(image.getName())) {
-                        Date phoDate = getDate(photo);
+                        /*Date phoDate = getDate(photo);
                         if(date.equals(phoDate)){
                             System.out.println("File: " + image.getName() + " already exists in " + fName);
                             return true;
-                        }
+                        }*/
+                        return checkIfSameImage(photo, image);
                     }
                 }
                 rs.close();
